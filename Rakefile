@@ -1,5 +1,6 @@
 require './lib/calendar'
 require './lib/gym_slots'
+require './lib/display'
 
 task :default do
   Rake::Task['list_entries'].invoke
@@ -15,8 +16,6 @@ task :work, [:monday] do |_t, args|
   monday = args[:monday] or abort 'Provide Monday date YYYY-MM-DD'
 
   cal = Calendar.new
-  # worked = cal.hours_worked(monday)
-  cal.hours_worked(monday)
-
-  # puts worked.inspect
+  worked = cal.hours_worked(monday)
+  Display.show_hours_worked(monday, worked)
 end
