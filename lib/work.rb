@@ -13,17 +13,6 @@ class Work < Calendar
     create_worked_output(events)
   end
 
-  def list_events(calendar_id, title, period_start, period_end)
-    @service.list_events(
-      calendar_id,
-      q:             title,
-      single_events: true,
-      order_by:      'startTime',
-      time_min:      period_start.to_time.utc.iso8601,
-      time_max:      period_end.to_time.utc.iso8601
-    )
-  end
-
   def create_worked_output(events)
     output = {}
     output[:work] = []
