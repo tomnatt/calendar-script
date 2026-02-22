@@ -13,9 +13,7 @@ task :list_gym, [:start_date, :blocks] do |_t, args|
 
   cal = GymSlots.new
   slots = cal.get_slots(start_date, blocks)
-
-  puts slots.inspect
-  # Display.show_gym_slots(slots)
+  Display.show_gym_slots(start_date, slots)
 end
 
 desc 'Update gym slots in calendar'
