@@ -8,7 +8,7 @@ end
 
 desc 'List gym slots in calendar'
 task :list_gym, [:start_date, :blocks] do |_t, args|
-  start_date = args[:start_date] || Date.today
+  start_date = args[:start_date] || Date.today.to_s
   blocks = args[:blocks] || 6
 
   cal = GymSlots.new
@@ -20,8 +20,8 @@ end
 
 desc 'Update gym slots in calendar'
 task :update_gym, [:start_date, :blocks] do |_t, args|
-  start_date = args[:start_date] or abort 'Provide start date YYYY-MM-DD'
-  blocks = arg[:blocks] or 6
+  start_date = args[:start_date] || Date.today.to_s
+  blocks = args[:blocks] || 6
 
   # Do things
 end
