@@ -81,13 +81,13 @@ class GymSlots < Calendar
     return if first_block.nil?
 
     old_summary = slot.summary
-    if ((index - first_block) % 8).zero?
-      slot.summary = 'Grace in the gym - first in set'
-    elsif (index - first_block) % 8 == 7
-      slot.summary = 'Grace in the gym - last in set'
-    else
-      slot.summary = 'Grace in the gym'
-    end
+    slot.summary = if ((index - first_block) % 8).zero?
+                     'Grace in the gym - first in set'
+                   elsif (index - first_block) % 8 == 7
+                     'Grace in the gym - last in set'
+                   else
+                     'Grace in the gym'
+                   end
 
     # Then write back if in write mode and it has changed
     write_slot(slot) if @write && slot.summary != old_summary
