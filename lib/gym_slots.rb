@@ -26,15 +26,16 @@ class GymSlots < Calendar
     output
   end
 
+  # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
   def update_slots(start_date, blocks)
     # 8 slots per block
     number_slots = blocks * 8
-
     slots = get_slot_list(start_date)
 
-    output = {}
-    output[:total_bookings] = number_slots
-    output[:bookings] = []
+    output = {
+      total_bookings: number_slots,
+      bookings:       []
+    }
 
     first_block = nil
 
@@ -46,25 +47,11 @@ class GymSlots < Calendar
       # Identify the first of a set in this block of dates
       first_block ||= i if slot.summary.casecmp?('Grace in the gym - first in set')
 
-      booking_pair = {}
-
-      # Original version for output
-      booking_pair[:old] = create_booking(slot)
-
-      unless first_block.nil?
-        old_summary = slot.summary
-        if ((i - first_block) % 8).zero?
-          slot.summary = 'Grace in the gym - first in set'
-        elsif (i - first_block) % 8 == 7
-          slot.summary = 'Grace in the gym - last in set'
-        else
-          slot.summary = 'Grace in the gym'
-        end
-
-        # Then write back if in write mode and it has changed
-        update_slot(slot) if @write && slot.summary != old_summary
-      end
-
+      # Set up old and new versions of a booking
+      booking_pair = {
+        old: create_booking(slot)
+      }
+      update_slot(i, first_block, slot)
       booking_pair[:new] = create_booking(slot)
 
       output[:bookings] << booking_pair
@@ -72,6 +59,7 @@ class GymSlots < Calendar
 
     output
   end
+  # rubocop:enable Metrics/AbcSize, Metrics/MethodLength
 
   def create_booking(slot)
     { name:       slot.summary,
@@ -89,7 +77,23 @@ class GymSlots < Calendar
     list_events(calendar_id, title, start, final)
   end
 
-  def update_slot(slot)
+  def update_slot(index, first_block, slot)
+    return if first_block.nil?
+
+    old_summary = slot.summary
+    if ((index - first_block) % 8).zero?
+      slot.summary = 'Grace in the gym - first in set'
+    elsif (index - first_block) % 8 == 7
+      slot.summary = 'Grace in the gym - last in set'
+    else
+      slot.summary = 'Grace in the gym'
+    end
+
+    # Then write back if in write mode and it has changed
+    write_slot(slot) if @write && slot.summary != old_summary
+  end
+
+  def write_slot(slot)
     calendar_id = ENV.fetch('GOOGLE_CALENDAR_ID')
     @service.update_event(calendar_id, slot.id, slot)
   end
