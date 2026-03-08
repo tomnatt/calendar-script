@@ -16,11 +16,18 @@ class Display
   def self.show_gym_slots(start, slots)
     puts "Gym slots starting: #{start}"
     puts "#{slots[:total_bookings]} bookings ahead"
+    puts "Next session: #{slots[:next_booking].strftime('%d/%m/%y %H:%M (%a)')}"
     puts ''
 
     slots[:bookings].each do |slot|
-      # Name    date (day)
-      puts slot[:name].ljust(34) + slot[:start_time].strftime('%d/%m/%y (%a)')
+      out = name_time(slot)
+      out += '  ← next session' if slots[:next_booking] == slot[:start_time]
+      puts out
     end
+  end
+
+  def self.name_time(slot)
+    # Name    date (day)
+    slot[:name].ljust(34) + slot[:start_time].strftime('%d/%m/%y %H:%M (%a)')
   end
 end

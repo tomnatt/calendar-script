@@ -20,8 +20,12 @@ class GymSlots < Calendar
     output[:total_bookings] = number_slots
     output[:bookings] = []
 
+    # Iterate through the given number of bookings
     slots.items.first(number_slots).each do |slot|
       output[:bookings] << create_booking(slot)
+
+      # If booking today or first booking after today add to output
+      output[:next_booking] ||= slot.start.date_time if slot.start.date_time >= DateTime.now
     end
 
     output
