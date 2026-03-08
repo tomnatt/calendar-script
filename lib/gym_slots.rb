@@ -51,14 +51,18 @@ class GymSlots < Calendar
       # Original version for output
       booking_pair[:old] = create_booking(slot)
 
-      if first_block.nil?
-        # Do nothing here
-      elsif ((i - first_block) % 8).zero?
-        slot.summary = 'Grace in the gym - first in set'
-      elsif (i - first_block) % 8 == 7
-        slot.summary = 'Grace in the gym - last in set'
-      else
-        slot.summary = 'Grace in the gym'
+      unless first_block.nil?
+        old_summary = slot.summary
+        if ((i - first_block) % 8).zero?
+          slot.summary = 'Grace in the gym - first in set'
+        elsif (i - first_block) % 8 == 7
+          slot.summary = 'Grace in the gym - last in set'
+        else
+          slot.summary = 'Grace in the gym'
+        end
+
+        # Then write back if in write mode and it has changed
+        update_slot(slot) if @write && slot.summary != old_summary
       end
 
       booking_pair[:new] = create_booking(slot)
@@ -83,5 +87,10 @@ class GymSlots < Calendar
     title = 'Grace in the gym'
 
     list_events(calendar_id, title, start, final)
+  end
+
+  def update_slot(slot)
+    calendar_id = ENV.fetch('GOOGLE_CALENDAR_ID')
+    @service.update_event(calendar_id, slot.id, slot)
   end
 end
