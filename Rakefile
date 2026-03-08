@@ -22,6 +22,9 @@ task :update_gym, [:start_date, :blocks] do |_t, args|
   blocks = args[:blocks] || 6
 
   # Do things
+  cal = GymSlots.new
+  slots = cal.update_slots(start_date, blocks)
+  Display.show_updated_gym_slots(start_date, slots)
 end
 
 desc 'List work entries and total hours worked for a given week'

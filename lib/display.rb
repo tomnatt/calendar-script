@@ -26,8 +26,27 @@ class Display
     end
   end
 
+  def self.show_updated_gym_slots(start, slots)
+    puts "Gym slots starting: #{start}"
+    puts "#{slots[:total_bookings]} bookings ahead"
+    puts "Next session: #{slots[:next_booking].strftime('%d/%m/%y %H:%M (%a)')}"
+    puts ''
+
+    slots[:bookings].each do |slot_pair|
+      out = name_time(slot_pair[:old])
+      out += new_name_time(slot_pair[:new])
+      out += '  ← next session' if slots[:next_booking] == slot_pair[:new][:start_time]
+      puts out
+    end
+  end
+
   def self.name_time(slot)
-    # Name    date (day)
-    slot[:name].ljust(34) + slot[:start_time].strftime('%d/%m/%y %H:%M (%a)')
+    # Date (day)    Name
+    slot[:start_time].strftime('%d/%m/%y %H:%M (%a)').ljust(28) + slot[:name].ljust(34)
+  end
+
+  def self.new_name_time(slot)
+    # →   Name
+    '→'.ljust(5) + slot[:name].ljust(34)
   end
 end
