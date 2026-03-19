@@ -4,7 +4,6 @@ require 'googleauth'
 class Calendar
   def initialize(write: false)
     json_key_file = ENV.fetch('GOOGLE_CALENDAR_SERVICE_ACCOUNT_KEY_FILE')
-    abort 'Missing key file' if json_key_file.nil?
 
     # Default to Read Only, unless stated otherwise
     scope = write ? write_scope : read_scope
