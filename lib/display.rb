@@ -1,4 +1,4 @@
-class Display
+module Display
   def self.show_hours_worked(day, worked)
     puts "Week starting: #{day}"
     puts "Hours worked:  #{worked[:total]}"
