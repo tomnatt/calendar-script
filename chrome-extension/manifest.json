@@ -3,6 +3,24 @@
   "name": "Google Calendar Week Monday",
   "version": "1.0",
   "description": "Adds a button to Google Calendar's weekly view showing the Monday date of the current week",
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "action": {
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  },
+  "web_accessible_resources": [
+    {
+      "resources": ["icons/*"],
+      "matches": ["https://calendar.google.com/*"]
+    }
+  ],
   "content_scripts": [
     {
       "matches": ["https://calendar.google.com/*"],

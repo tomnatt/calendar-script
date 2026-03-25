@@ -56,7 +56,7 @@ function showOverlay(monday) {
 }
 
 function injectButton() {
-  if (!window.location.pathname.includes('/week/')) {
+  if (!window.location.pathname.includes('/week')) {
     document.getElementById('wcm-btn')?.remove();
     return;
   }
@@ -68,8 +68,14 @@ function injectButton() {
 
   const btn = document.createElement('button');
   btn.id = 'wcm-btn';
-  btn.textContent = 'Week';
   btn.title = 'Show Monday of current week';
+
+  const img = document.createElement('img');
+  img.src = chrome.runtime.getURL('icons/icon16.png');
+  img.alt = 'Week';
+  img.width = 16;
+  img.height = 16;
+  btn.appendChild(img);
 
   btn.addEventListener('click', () => {
     const monday = getMondayOfWeek(getDateFromUrl());
