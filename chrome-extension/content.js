@@ -41,18 +41,20 @@ function showOverlay(monday) {
 
   document.body.appendChild(overlay);
 
+  function closeOverlay() {
+    overlay.remove();
+    document.removeEventListener('keydown', keyHandler);
+  }
+
+  function keyHandler(e) {
+    if (e.key === 'Escape') closeOverlay();
+  }
+
   overlay.addEventListener('click', (e) => {
-    if (e.target === overlay || e.target.id === 'wcm-close') {
-      overlay.remove();
-    }
+    if (e.target === overlay || e.target.id === 'wcm-close') closeOverlay();
   });
 
-  document.addEventListener('keydown', function handler(e) {
-    if (e.key === 'Escape') {
-      overlay.remove();
-      document.removeEventListener('keydown', handler);
-    }
-  });
+  document.addEventListener('keydown', keyHandler);
 }
 
 function injectButton() {
@@ -85,7 +87,11 @@ function injectButton() {
   anchor.parentNode.insertBefore(btn, anchor.nextSibling);
 }
 
-const observer = new MutationObserver(() => injectButton());
+let debounceTimer;
+const observer = new MutationObserver(() => {
+  clearTimeout(debounceTimer);
+  debounceTimer = setTimeout(injectButton, 300);
+});
 observer.observe(document.body, { childList: true, subtree: true });
 
 injectButton();

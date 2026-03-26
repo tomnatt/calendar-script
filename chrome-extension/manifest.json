@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "Google Calendar Week Monday",
+  "name": "Google Calendar Work Week",
   "version": "1.0",
-  "description": "Adds a button to Google Calendar's weekly view showing the Monday date of the current week",
+  "description": "Adds a button to Google Calendar's weekly view which counts hours worked in the current week",
   "icons": {
     "16": "icons/icon16.png",
     "48": "icons/icon48.png",
