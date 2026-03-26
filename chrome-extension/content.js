@@ -47,6 +47,10 @@ function showOverlay(monday) {
   }
 
   function keyHandler(e) {
+    if (!overlay.isConnected) {
+      document.removeEventListener('keydown', keyHandler);
+      return;
+    }
     if (e.key === 'Escape') closeOverlay();
   }
 
