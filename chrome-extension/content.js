@@ -70,7 +70,10 @@ function injectButton() {
   if (document.getElementById('wcm-btn')) return;
 
   const anchor = document.querySelector('[jscontroller="qoxFud"]');
-  if (!anchor) return;
+  if (!anchor) {
+    console.warn('[wcm] Anchor element not found — Google Calendar UI may have changed.');
+    return;
+  }
 
   const btn = document.createElement('button');
   btn.id = 'wcm-btn';
