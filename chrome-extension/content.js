@@ -1,3 +1,41 @@
+function parseTime24ToHours(str) {
+  const match = str.trim().match(/(\d{1,2}):(\d{2})/);
+  if (!match) return null;
+  return parseInt(match[1]) + parseInt(match[2]) / 60;
+}
+
+function scrapeWorkMeetings() {
+  const events = [];
+  const seen = new Set();
+
+  document.querySelectorAll('[data-eventid]').forEach(el => {
+    const labelEl = el.querySelector('.XuJrye');
+    if (!labelEl) return;
+
+    const text = labelEl.textContent.trim();
+    if (seen.has(text)) return;
+
+    // Format: "13:45 to 17:15, Work, ..."
+    const match = text.match(/^(\d{1,2}:\d{2})\s+to\s+(\d{1,2}:\d{2}),\s*([^,]+)/);
+    if (!match) return;
+    if (!/^work$/i.test(match[3].trim())) return;
+
+    seen.add(text);
+
+    const startH = parseTime24ToHours(match[1]);
+    const endH = parseTime24ToHours(match[2]);
+    if (startH === null || endH === null) return;
+
+    events.push({
+      start: match[1],
+      end: match[2],
+      duration: endH - startH
+    });
+  });
+
+  return events;
+}
+
 function getMondayOfWeek(date) {
   const d = new Date(date);
   const day = d.getDay(); // 0 = Sunday, 1 = Monday, ...
@@ -29,6 +67,19 @@ function showOverlay(monday) {
     return;
   }
 
+  const meetings = scrapeWorkMeetings();
+  const total = meetings.reduce((sum, e) => sum + e.duration, 0);
+
+  const rows = meetings.length
+    ? meetings.map(e =>
+        `<li class="wcm-event"><span class="wcm-time">${e.start} – ${e.end}</span><span class="wcm-hours">${e.duration % 1 === 0 ? e.duration : e.duration.toFixed(1)}h</span></li>`
+      ).join('')
+    : '<li class="wcm-empty">No "Work" events found in view</li>';
+
+  const totalLine = meetings.length
+    ? `<p id="wcm-total">Total: <strong>${total % 1 === 0 ? total : total.toFixed(1)} hours</strong></p>`
+    : '';
+
   const overlay = document.createElement('div');
   overlay.id = 'wcm-overlay';
   overlay.innerHTML = `
@@ -36,6 +87,8 @@ function showOverlay(monday) {
       <button id="wcm-close" aria-label="Close">✕</button>
       <p id="wcm-label">Week commencing</p>
       <p id="wcm-date">${formatDate(monday)}</p>
+      <ul id="wcm-events">${rows}</ul>
+      ${totalLine}
     </div>
   `;
 

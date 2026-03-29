@@ -63,3 +63,40 @@
   font-weight: 400;
   color: #202124;
 }
+
+#wcm-events {
+  list-style: none;
+  margin: 20px 0 0;
+  padding: 0;
+  text-align: left;
+  border-top: 1px solid #e0e0e0;
+  padding-top: 12px;
+}
+
+.wcm-event {
+  display: flex;
+  justify-content: space-between;
+  padding: 4px 0;
+  font-size: 14px;
+  color: #3c4043;
+}
+
+.wcm-hours {
+  font-weight: 500;
+  margin-left: 16px;
+}
+
+.wcm-empty {
+  font-size: 13px;
+  color: #5f6368;
+  font-style: italic;
+}
+
+#wcm-total {
+  margin: 12px 0 0;
+  font-size: 14px;
+  color: #3c4043;
+  text-align: right;
+  border-top: 1px solid #e0e0e0;
+  padding-top: 8px;
+}
