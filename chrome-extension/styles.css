@@ -73,12 +73,25 @@
   padding-top: 12px;
 }
 
+.wcm-day-header {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 0 2px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #202124;
+}
+
+.wcm-day-header:first-child {
+  padding-top: 0;
+}
+
 .wcm-event {
   display: flex;
   justify-content: space-between;
-  padding: 4px 0;
-  font-size: 14px;
-  color: #3c4043;
+  padding: 2px 0 2px 12px;
+  font-size: 13px;
+  color: #5f6368;
 }
 
 .wcm-hours {

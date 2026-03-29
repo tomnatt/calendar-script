@@ -15,8 +15,8 @@ function scrapeWorkMeetings() {
     const text = labelEl.textContent.trim();
     if (seen.has(text)) return;
 
-    // Format: "13:45 to 17:15, Work, ..."
-    const match = text.match(/^(\d{1,2}:\d{2})\s+to\s+(\d{1,2}:\d{2}),\s*([^,]+)/);
+    // Format: "13:45 to 17:15, Work, Tom Natt, No location, 24 March 2026"
+    const match = text.match(/^(\d{1,2}:\d{2})\s+to\s+(\d{1,2}:\d{2}),\s*([^,]+)(?:.*,\s*(\d{1,2}\s+\w+\s+\d{4}))?/);
     if (!match) return;
     if (!/^work$/i.test(match[3].trim())) return;
 
@@ -26,13 +26,20 @@ function scrapeWorkMeetings() {
     const endH = parseTime24ToHours(match[2]);
     if (startH === null || endH === null) return;
 
+    const date = match[4] ? new Date(match[4]) : null;
+    const day = date ? date.toLocaleDateString('en-GB', { weekday: 'long' }) : 'Unknown';
+    const dayOrder = date ? date.getDay() : 99;
+
     events.push({
       start: match[1],
       end: match[2],
-      duration: endH - startH
+      duration: endH - startH,
+      day,
+      dayOrder
     });
   });
 
+  events.sort((a, b) => a.dayOrder - b.dayOrder || a.start.localeCompare(b.start));
   return events;
 }
 
@@ -70,14 +77,32 @@ function showOverlay(monday) {
   const meetings = scrapeWorkMeetings();
   const total = meetings.reduce((sum, e) => sum + e.duration, 0);
 
-  const rows = meetings.length
-    ? meetings.map(e =>
-        `<li class="wcm-event"><span class="wcm-time">${e.start} – ${e.end}</span><span class="wcm-hours">${e.duration % 1 === 0 ? e.duration : e.duration.toFixed(1)}h</span></li>`
-      ).join('')
-    : '<li class="wcm-empty">No "Work" events found in view</li>';
+  function fmtH(h) { return `${h % 1 === 0 ? h : h.toFixed(2)}h`; }
+
+  let rows;
+  if (meetings.length) {
+    const byDay = [];
+    meetings.forEach(e => {
+      let group = byDay.find(g => g.day === e.day);
+      if (!group) { group = { day: e.day, events: [], subtotal: 0 }; byDay.push(group); }
+      group.events.push(e);
+      group.subtotal += e.duration;
+    });
+
+    rows = byDay.map(g => `
+      <li class="wcm-day-header">
+        <span>${g.day}</span><span class="wcm-hours">${fmtH(g.subtotal)}</span>
+      </li>
+      ${g.events.map(e =>
+        `<li class="wcm-event"><span class="wcm-time">${e.start} – ${e.end}</span><span class="wcm-hours">${fmtH(e.duration)}</span></li>`
+      ).join('')}
+    `).join('');
+  } else {
+    rows = '<li class="wcm-empty">No "Work" events found in view</li>';
+  }
 
   const totalLine = meetings.length
-    ? `<p id="wcm-total">Total: <strong>${total % 1 === 0 ? total : total.toFixed(1)} hours</strong></p>`
+    ? `<p id="wcm-total">Total: <strong>${fmtH(total)}</strong></p>`
     : '';
 
   const overlay = document.createElement('div');
