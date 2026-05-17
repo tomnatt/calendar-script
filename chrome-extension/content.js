@@ -18,7 +18,15 @@ function scrapeWorkMeetings() {
     // Format: "13:45 to 17:15, Work, Tom Natt, No location, 24 March 2026"
     const match = text.match(/^(\d{1,2}:\d{2})\s+to\s+(\d{1,2}:\d{2}),\s*([^,]+)(?:.*,\s*(\d{1,2}\s+\w+\s+\d{4}))?/);
     if (!match) return;
-    if (!/^work$/i.test(match[3].trim())) return;
+    const titleTrimmed = match[3].trim();
+    let project;
+    if (/^work$/i.test(titleTrimmed) || /^work\s*-\s*pol$/i.test(titleTrimmed)) {
+      project = 'POL';
+    } else if (/^work\s*-\s*dbt$/i.test(titleTrimmed)) {
+      project = 'DBT';
+    } else {
+      return;
+    }
 
     seen.add(text);
 
@@ -35,7 +43,8 @@ function scrapeWorkMeetings() {
       end: match[2],
       duration: endH - startH,
       day,
-      dayOrder
+      dayOrder,
+      project
     });
   });
 
@@ -75,21 +84,28 @@ function showOverlay(monday) {
   }
 
   const meetings = scrapeWorkMeetings();
-  const total = meetings.reduce((sum, e) => sum + e.duration, 0);
 
   function fmtH(h) { return `${h % 1 === 0 ? h : h.toFixed(2)}h`; }
 
-  let rows;
-  if (meetings.length) {
+  function buildColumn(project) {
+    const events = meetings.filter(e => e.project === project);
+    if (!events.length) {
+      return `<div class="wcm-column">
+        <h3 class="wcm-col-header">${project}</h3>
+        <ul class="wcm-col-events"><li class="wcm-empty">No events</li></ul>
+        <p class="wcm-col-total">Total: <strong>0h</strong></p>
+      </div>`;
+    }
+
     const byDay = [];
-    meetings.forEach(e => {
+    events.forEach(e => {
       let group = byDay.find(g => g.day === e.day);
       if (!group) { group = { day: e.day, events: [], subtotal: 0 }; byDay.push(group); }
       group.events.push(e);
       group.subtotal += e.duration;
     });
 
-    rows = byDay.map(g => `
+    const rows = byDay.map(g => `
       <li class="wcm-day-header">
         <span>${g.day}</span><span class="wcm-hours">${fmtH(g.subtotal)}</span>
       </li>
@@ -97,12 +113,18 @@ function showOverlay(monday) {
         `<li class="wcm-event"><span class="wcm-time">${e.start} – ${e.end}</span><span class="wcm-hours">${fmtH(e.duration)}</span></li>`
       ).join('')}
     `).join('');
-  } else {
-    rows = '<li class="wcm-empty">No "Work" events found in view</li>';
+
+    const total = events.reduce((sum, e) => sum + e.duration, 0);
+    return `<div class="wcm-column">
+      <h3 class="wcm-col-header">${project}</h3>
+      <ul class="wcm-col-events">${rows}</ul>
+      <p class="wcm-col-total">Total: <strong>${fmtH(total)}</strong></p>
+    </div>`;
   }
 
-  const totalLine = meetings.length
-    ? `<p id="wcm-total">Total: <strong>${fmtH(total)}</strong></p>`
+  const grandTotal = meetings.reduce((sum, e) => sum + e.duration, 0);
+  const grandTotalLine = meetings.length
+    ? `<p id="wcm-total">Combined total: <strong>${fmtH(grandTotal)}</strong></p>`
     : '';
 
   const overlay = document.createElement('div');
@@ -112,8 +134,11 @@ function showOverlay(monday) {
       <button id="wcm-close" aria-label="Close">✕</button>
       <p id="wcm-label">Week commencing</p>
       <p id="wcm-date">${formatDate(monday)}</p>
-      <ul id="wcm-events">${rows}</ul>
-      ${totalLine}
+      <div id="wcm-columns">
+        ${buildColumn('POL')}
+        ${buildColumn('DBT')}
+      </div>
+      ${grandTotalLine}
     </div>
   `;
 

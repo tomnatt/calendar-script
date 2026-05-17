@@ -2,6 +2,9 @@
 keys
 test.rb
 
+# File for session Claude instructions
+TODO.md
+
 *.gem
 *.rbc
 /.config
