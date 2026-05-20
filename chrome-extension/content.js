@@ -86,6 +86,11 @@ function showOverlay(monday) {
   const meetings = scrapeWorkMeetings();
 
   function fmtH(h) { return `${h % 1 === 0 ? h : h.toFixed(2)}h`; }
+  function fmtSheet(h) {
+    if (h === 0) return '0';
+    if (h % 1 === 0) return String(h);
+    return parseFloat(h.toFixed(2)).toString();
+  }
 
   function buildColumn(project) {
     const events = meetings.filter(e => e.project === project);
@@ -127,6 +132,21 @@ function showOverlay(monday) {
     ? `<p id="wcm-total">Combined total: <strong>${fmtH(grandTotal)}</strong></p>`
     : '';
 
+  const dayNames = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
+
+  function buildSheetColumn(project) {
+    const byDay = {};
+    meetings.filter(e => e.project === project).forEach(e => {
+      byDay[e.day] = (byDay[e.day] || 0) + e.duration;
+    });
+    const values = dayNames.map(d => fmtSheet(byDay[d] || 0)).join('\n');
+    return `<div class="wcm-sheet-col">
+      <p class="wcm-sheet-proj">${project}</p>
+      <pre class="wcm-sheet-pre" id="wcm-sheet-${project}">${values}</pre>
+      <button class="wcm-sheet-copy" data-target="wcm-sheet-${project}">Copy</button>
+    </div>`;
+  }
+
   const overlay = document.createElement('div');
   overlay.id = 'wcm-overlay';
   overlay.innerHTML = `
@@ -139,10 +159,27 @@ function showOverlay(monday) {
         ${buildColumn('DBT')}
       </div>
       ${grandTotalLine}
+      <div id="wcm-sheet">
+        <p id="wcm-sheet-label">Spreadsheet</p>
+        <div id="wcm-sheet-cols">
+          ${buildSheetColumn('POL')}
+          ${buildSheetColumn('DBT')}
+        </div>
+      </div>
     </div>
   `;
 
   document.body.appendChild(overlay);
+
+  overlay.querySelectorAll('.wcm-sheet-copy').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const pre = document.getElementById(btn.dataset.target);
+      navigator.clipboard.writeText(pre.textContent).then(() => {
+        btn.textContent = 'Copied!';
+        setTimeout(() => { btn.textContent = 'Copy'; }, 1500);
+      });
+    });
+  });
 
   function closeOverlay() {
     overlay.remove();
