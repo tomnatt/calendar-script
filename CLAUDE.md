@@ -21,10 +21,13 @@ Two independent components share no code:
 
 Manifest V3 extension targeting `https://calendar.google.com/*`. Works entirely client-side — no backend calls.
 
-- **`content.js`** — injects a button into the weekly view header via MutationObserver (to survive Google Calendar's SPA navigation), scrapes Work event durations from the DOM, and renders a modal overlay with per-day subtotals and a weekly total
+- **`content.js`** — injects two buttons into the weekly view header via MutationObserver (to survive Google Calendar's SPA navigation): an hours-count button and an availability button
 - **`styles.css`** — modal overlay styles
 
-The DOM scraper parses event label text matching the format `"HH:MM to HH:MM, Work, ..."`. The button is only shown in week view; the MutationObserver re-injects it on navigation.
+The DOM scraper parses event label text matching the format `"HH:MM to HH:MM, Work, ..."`. Both buttons are only shown in week view; the MutationObserver re-injects them on navigation.
+
+- **Hours count** (`wcm-btn` → `showOverlay`) — scrapes Work events, buckets them into projects (`POL` for "Work"/"Work - POL", `DBT` for "Work - DBT"), and renders per-project columns with per-day subtotals and a weekly total. A project's column is hidden entirely when it has no hours that week; if no project has any hours, a "no hours logged" message is shown instead. Also renders a spreadsheet-paste section (day-by-day values per project for pasting into a spreadsheet) — hidden entirely when the week has no hours, and per-project within it hidden when that project has no hours that week.
+- **Availability** (`avail-btn` → `showAvailabilityOverlay`) — scrapes all calendar events, merges them into busy intervals, and computes free slots Mon–Fri within working hours (08:30–17:00, Tuesday starting 10:00), excluding Work events and past time on the current day. Renders a copyable "my availability" summary.
 
 ### Ruby Backend (`lib/`, `Rakefile`)
 
