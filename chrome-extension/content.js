@@ -144,13 +144,7 @@ function showOverlay(monday) {
 
   function buildColumn(project) {
     const events = meetings.filter(e => e.project === project);
-    if (!events.length) {
-      return `<div class="wcm-column">
-        <h3 class="wcm-col-header">${project}</h3>
-        <ul class="wcm-col-events"><li class="wcm-empty">No events</li></ul>
-        <p class="wcm-col-total">Total: <strong>0h</strong></p>
-      </div>`;
-    }
+    if (!events.length) return '';
 
     const byDay = [];
     events.forEach(e => {
@@ -182,11 +176,18 @@ function showOverlay(monday) {
     ? `<p id="wcm-total">Combined total: <strong>${fmtH(grandTotal)}</strong></p>`
     : '';
 
+  const columnsHtml = meetings.length
+    ? `${buildColumn('POL')}${buildColumn('DBT')}`
+    : `<p id="wcm-empty">No hours logged for any project this week.</p>`;
+
   const dayNames = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
 
   function buildSheetColumn(project) {
+    const events = meetings.filter(e => e.project === project);
+    if (!events.length) return '';
+
     const byDay = {};
-    meetings.filter(e => e.project === project).forEach(e => {
+    events.forEach(e => {
       byDay[e.day] = (byDay[e.day] || 0) + e.duration;
     });
     const values = dayNames.map(d => fmtSheet(byDay[d] || 0)).join('\n');
@@ -197,6 +198,16 @@ function showOverlay(monday) {
     </div>`;
   }
 
+  const sheetHtml = meetings.length
+    ? `<div id="wcm-sheet">
+        <p id="wcm-sheet-label">Spreadsheet</p>
+        <div id="wcm-sheet-cols">
+          ${buildSheetColumn('POL')}
+          ${buildSheetColumn('DBT')}
+        </div>
+      </div>`
+    : '';
+
   const overlay = document.createElement('div');
   overlay.id = 'wcm-overlay';
   overlay.innerHTML = `
@@ -205,17 +216,10 @@ function showOverlay(monday) {
       <p id="wcm-label">Week commencing</p>
       <p id="wcm-date">${formatDate(monday)}</p>
       <div id="wcm-columns">
-        ${buildColumn('POL')}
-        ${buildColumn('DBT')}
+        ${columnsHtml}
       </div>
       ${grandTotalLine}
-      <div id="wcm-sheet">
-        <p id="wcm-sheet-label">Spreadsheet</p>
-        <div id="wcm-sheet-cols">
-          ${buildSheetColumn('POL')}
-          ${buildSheetColumn('DBT')}
-        </div>
-      </div>
+      ${sheetHtml}
     </div>
   `;
 
