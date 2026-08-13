@@ -225,10 +225,12 @@
   margin-left: 16px;
 }
 
-.wcm-empty {
+#wcm-empty {
   font-size: 13px;
   color: #5f6368;
   font-style: italic;
+  text-align: center;
+  width: 100%;
 }
 
 #wcm-total {
