@@ -81,13 +81,15 @@ class GymSlots < Calendar
   def update_slot(index, first_block, slot)
     return if first_block.nil?
 
+    pt = Config.pt
+
     old_summary = slot.summary
     slot.summary = if ((index - first_block) % 8).zero?
-                     Config.first_session[Config.pt]
+                     Config.first_session[pt]
                    elsif (index - first_block) % 8 == 7
-                     Config.last_session[Config.pt]
+                     Config.last_session[pt]
                    else
-                     Config.other_session[Config.pt]
+                     Config.other_session[pt]
                    end
 
     # Then write back if in write mode and it has changed
