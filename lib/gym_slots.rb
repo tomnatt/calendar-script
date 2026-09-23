@@ -1,5 +1,6 @@
 require 'date'
 require_relative 'calendar'
+require_relative 'config'
 
 class GymSlots < Calendar
   def get_slots(start_date, blocks)
@@ -45,7 +46,7 @@ class GymSlots < Calendar
       output[:next_booking] ||= slot.start.date_time if slot.start.date_time >= DateTime.now
 
       # Identify the first of a set in this block of dates
-      first_block ||= i if slot.summary.casecmp?('Grace in the gym - first in set')
+      first_block ||= i if slot.summary.casecmp?(Config.first_session[Config.pt])
 
       # Set up old and new versions of a booking
       booking_pair = {
@@ -72,7 +73,7 @@ class GymSlots < Calendar
     final = start + 365
 
     calendar_id = ENV.fetch('GOOGLE_CALENDAR_ID')
-    title = 'Grace in the gym'
+    title = Config.other_session[Config.pt]
 
     list_events(calendar_id, title, start, final)
   end
@@ -82,11 +83,11 @@ class GymSlots < Calendar
 
     old_summary = slot.summary
     slot.summary = if ((index - first_block) % 8).zero?
-                     'Grace in the gym - first in set'
+                     Config.first_session[Config.pt]
                    elsif (index - first_block) % 8 == 7
-                     'Grace in the gym - last in set'
+                     Config.last_session[Config.pt]
                    else
-                     'Grace in the gym'
+                     Config.other_session[Config.pt]
                    end
 
     # Then write back if in write mode and it has changed
