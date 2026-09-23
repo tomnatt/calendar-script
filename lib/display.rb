@@ -15,8 +15,8 @@ module Display
 
   def self.show_gym_slots(start, slots)
     puts "Gym slots starting: #{start}"
-    puts "#{slots[:total_bookings]} bookings ahead"
-    puts "Next session: #{slots[:next_booking].strftime('%d/%m/%y %H:%M (%a)')}"
+    puts "#{slots[:total_bookings]} potential bookings ahead"
+    puts "Next session: #{slots[:next_booking].strftime('%d/%m/%y %H:%M (%a)')}" if slots[:next_booking]
     puts ''
 
     slots[:bookings].each do |slot|
@@ -28,8 +28,8 @@ module Display
 
   def self.show_updated_gym_slots(start, slots)
     puts "Gym slots starting: #{start}"
-    puts "#{slots[:total_bookings]} bookings ahead"
-    puts "Next session: #{slots[:next_booking].strftime('%d/%m/%y %H:%M (%a)')}"
+    puts "#{slots[:total_bookings]} potential bookings ahead"
+    puts "Next session: #{slots[:next_booking].strftime('%d/%m/%y %H:%M (%a)')}" if slots[:next_booking]
     puts ''
 
     slots[:bookings].each do |slot_pair|
