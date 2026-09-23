@@ -10,6 +10,9 @@ rake update_gym[start_date,write]  # Update gym slots in calendar
 rake work[monday]                  # List work entries and total hours worked for a given week
 ```
 
+Date in format `2026-09-01`
+Supports different PTs - set in `lib/config.rb`
+
 ## Setup
 
 * Create a Service Account with Calendar read/write permissions and get key file
